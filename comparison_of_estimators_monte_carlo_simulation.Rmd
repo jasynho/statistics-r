@@ -1,0 +1,207 @@
+---
+title: "comparison_of_estimators"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Assume we draw a random sample $\{{X}_i, i:1\to n\}$ from a normal distribution with mean mu = 0. Assume futher that there are three different estimators for the variance which we would like to compare in the following script:
+\[
+T_1 = \frac{1}{n}\sum_{i=1}^n \left(X_i - \mu\right)^2, \quad T_2 = \frac{1}{n-1}\sum_{i=1}^n \left(X_i - \mu\right)^2 \quad \mbox{and}\quad T_3 =\frac{1}{n+2}\sum_{i=1}^n \left(X_i - \mu\right)^2\,.
+\]
+
+At first we write each estimator as a function:
+```{r warning=FALSE, error=TRUE}
+T_1 = function(x){
+  1/length(x)*sum((x)^2)
+}
+
+T_2 = function(x){
+  1/(length(x)-1)*sum((x)^2)
+}
+  
+T_3 = function(x){
+  1/(length(x)+2)*sum((x)^2)
+}
+```
+
+For later calculations we then write one function for the bias and one for the MSE:
+```{r warning=FALSE, error=TRUE}
+
+bias = function(yhat, y){
+  mean(yhat - y)
+}
+
+
+MSE = function(yhat, y){
+  mean((yhat - y)^2)
+}
+```
+
+Now we want to check weather our estimators are unbiased. We therefore draw random samples via Monte Carlo Simulation and estimate the variance for each estimator. The sample size ranges between 2 and 100, each sample size will have 1000 repetitions, the true parameter of the variance in the first case is 1 and in the second case 4 - in both cases the mean will be zero. 
+
+```{r warning=FALSE, error=TRUE}
+# Parameters
+sample_size = 2:100                # sample size 
+number_of_simulations    = 1000    # number of Monte Carlo replications
+seednum = 42              
+sigma_squared_1 = 1                # first true parameter
+sigma_squared_2 = 4                # second true parameter
+mu = 0
+
+# Estimate sigma_squared - first case sigma^2 = 1
+T_1_hat = c()
+T_2_hat = c()
+T_3_hat = c()
+for (i in sample_size){
+  set.seed(seednum)
+  T_1_hat[i-1] = replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1))))
+  set.seed(seednum)
+  T_2_hat[i-1] = replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1))))
+  set.seed(seednum)
+  T_3_hat[i-1] = replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1))))
+  print(T_1_hat)
+}
+
+# Estimate sigma_squared - second case sigma^2 = 4
+T_1_2_hat = c()
+T_2_2_hat = c()
+T_3_2_hat = c()
+for (i in sample_size){
+  set.seed(seednum)
+  T_1_2_hat[i-1] = replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2))))
+  set.seed(seednum)
+  T_2_2_hat[i-1] = replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2))))
+  set.seed(seednum)
+  T_3_2_hat[i-1] = replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2))))
+  print(T_1_2_hat)
+}
+
+# Estimate bias - first case sigma^2 = 1
+bias_T_1_hat = c()
+bias_T_2_hat = c()
+bias_T_3_hat = c()
+for (i in sample_size){
+  set.seed(seednum)
+  bias_T_1_hat[i-1] = bias(replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+  set.seed(seednum)
+  bias_T_2_hat[i-1] = bias(replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+  set.seed(seednum)
+  bias_T_3_hat[i-1] = bias(replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+}
+
+# Estimate bias - second case sigma^2 = 4
+bias_T_1_2_hat = c()
+bias_T_2_2_hat = c()
+bias_T_3_2_hat = c()
+for (i in sample_size){
+  set.seed(seednum)
+  bias_T_1_2_hat[i-1] = bias(replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+  set.seed(seednum)
+  bias_T_2_2_hat[i-1] = bias(replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+  set.seed(seednum)
+  bias_T_3_2_hat[i-1] = bias(replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+  print(bias_T_1_2_hat)
+}
+
+
+# Plot - Biases of first case sigma^2 = 1
+plot(2:100, na.omit(bias_T_1_hat), ylim = c(-1,1), type = 'l', col = 'red', lwd = 2, ylab = 'Bias', main = 'Mean bias depending on sample sizes between 2 and 100, sigma^2 = 1', xlab = 'Sample size')
+lines(2:100, na.omit(bias_T_2_hat), type = 'l', col = 'blue')
+lines(2:100, na.omit(bias_T_3_hat), type = 'l', col = 'green')
+legend('bottomright', legend=c('T_1_hat','T_2_hat', 'T_3_hat'), fill=c('red','blue', 'green')) 
+
+
+
+# Plot - Biases of second case sigma^2 = 4
+plot(2:100, na.omit(bias_T_1_2_hat), ylim = c(-4,4), type = 'l', col = 'red', lwd = 2, ylab = 'Bias', main = 'Mean bias depending on sample sizes between 2 and 100, sigma^2 = 4', xlab = 'Sample size')
+lines(2:100, na.omit(bias_T_2_2_hat), type = 'l', col = 'blue')
+lines(2:100, na.omit(bias_T_3_2_hat), type = 'l', col = 'green')
+legend('bottomright', legend=c('T_1_hat','T_2_hat', 'T_3_hat'), fill=c('red','blue', 'green'))
+
+
+# Conclusion: Estimator T_1 is unbiased, estimators T_2 and T_3 are asymptotically unbiased. 
+```
+ 
+ Our next field of interest is plotting the variance of the different estimators against the CRLB (in our case: $CRLB = \frac{2(\sigma^2)^2}{n}$).
+ 
+```{r warning=FALSE, error=TRUE}
+# Parameters
+n = sample_size
+
+#CRLB = function(sigma, n){
+#  2*(sigma^2)^2/n
+#}
+
+# Plot - Variances of estimators - sigma^2 = 1
+plot(2:100, T_1_hat, ylim = c(0,2), type = 'l', col = 'red', lwd = 2, ylab = 'Variance', main = 'Variance depending on sample sizes between 2 and 100, sigma^2 = 1', xlab = 'Sample size')
+lines(2:100, T_2_hat, type = 'l', col = 'blue')
+lines(2:100, T_3_hat, type = 'l', col = 'green')
+lines(2:100,  2*(sigma_squared_1)^2/n, type = "l", col = "black", lwd = 2, ylab = "Variance", main = "CRLB", xlab = "Sample size")
+legend('topright', legend=c('T_1','T_2', 'T_3', 'CRLB'), fill=c('red','blue', 'green', 'black')) 
+
+# Plot - Variances of estimators - sigma^2 = 4
+plot(2:100, T_1_2_hat, ylim = c(0,20), type = 'l', col = 'red', lwd = 2, ylab = 'Variance', main = 'Variance depending on sample sizes between 2 and 100, sigma^2 = 4', xlab = 'Sample size')
+lines(2:100, T_2_2_hat, type = 'l', col = 'blue')
+lines(2:100, T_3_2_hat, type = 'l', col = 'green')
+lines(2:100,  2*(sigma_squared_2)^2/n, type = "l", col = "black", lwd = 2, ylab = "Variance", main = "CRLB", xlab = "Sample size")
+legend('topright', legend=c('T_1','T_2', 'T_3', 'CRLB'), fill=c('red','blue', 'green', 'black')) 
+
+# We see that T_1, T_2 and T_3 converge to the same value when n gets large so the difference between the different estimators becomes negligible. 
+
+# Note that the variance of T_3 is below the CRLB for small samples in the first graph which is the case because of the 'n+2' in the denominator. 
+```
+
+Finally we want to visualise the MSE of the different estimators.
+
+```{r warning=FALSE, error=TRUE, fig.align='center', fig.width = 10}
+# MSE first case sigma^2 = 1
+
+MSE_T_1 = c()
+MSE_T_2 = c()
+MSE_T_3 = c()
+for (i in sample_size){
+  set.seed(seednum)
+  MSE_T_1[i-1] = MSE(replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+  set.seed(seednum)
+  MSE_T_2[i-1] = MSE(replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+  set.seed(seednum)
+  MSE_T_3[i-1] = MSE(replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_1)))), sigma_squared_1)
+}
+
+# MSE second case sigma^2 = 4
+
+MSE_T_1_2 = c()
+MSE_T_2_2 = c()
+MSE_T_3_2 = c()
+for (i in sample_size){
+  set.seed(seednum)
+  MSE_T_1_2[i-1] = MSE(replicate(number_of_simulations, T_1(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+  set.seed(seednum)
+  MSE_T_2_2[i-1] = MSE(replicate(number_of_simulations, T_2(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+  set.seed(seednum)
+  MSE_T_3_2[i-1] = MSE(replicate(number_of_simulations, T_3(rnorm(i, mean = mu, sd = sqrt(sigma_squared_2)))), sigma_squared_2)
+}
+
+
+# Plot - MSE of estimators - sigma^2 = 1
+plot(2:100, MSE_T_1, ylim = c(0,10), type = 'l', col = 'red', lwd = 2, ylab = 'MSE', main = 'Variance depending on sample sizes between 2 and 100, sigma^2 = 1', xlab = 'Sample size')
+lines(2:100, MSE_T_2, type = 'l', col = 'blue')
+lines(2:100, MSE_T_3, type = 'l', col = 'green')
+legend('topright', legend=c('T_1','T_2','T_3'), fill=c('red','blue','green')) 
+
+# Plot - MSE of estimators - sigma^2 = 4
+plot(2:100, MSE_T_1_2, type = 'l', col = 'red', lwd = 2, ylab = 'MSE', main = 'Variance depending on sample sizes between 2 and 100, sigma^2 = 4', xlab = 'Sample size')
+lines(2:100, MSE_T_2_2, type = 'l', col = 'blue')
+lines(2:100, MSE_T_3_2, type = 'l', col = 'green')
+legend('topright', legend=c('T_1','T_2','T_3'), fill=c('red','blue','green')) 
+
+
+# As the sample size increases, the MSE of all the three estimators converges to the same value.
+```
+
+
+
+
+
