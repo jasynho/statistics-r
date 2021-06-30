@@ -1,0 +1,47 @@
+---
+title: "comparison_of_estimators"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+There are three different estimators which we would like to compare in the following script:
+\[
+T_1 = \frac{1}{n}\sum_{i=1}^n \left(X_i - \mu\right)^2, \quad T_2 = \frac{1}{n-1}\sum_{i=1}^n \left(X_i - \mu\right)^2 \quad \mbox{and}\quad T_3 =\frac{1}{n+2}\sum_{i=1}^n \left(X_i - \mu\right)^2\,.
+\]
+
+At first we write each estimator as a function:
+```{r warning=FALSE, error=TRUE}
+T_1 = function(x){
+  1/length(x)*sum((x)^2)
+}
+
+T_2 = function(x){
+  1/(length(x)-1)*sum((x)^2)
+}
+  
+T_3 = function(x){
+  1/(length(x)+2)*sum((x)^2)
+}
+```
+
+For later calculations we then write one function for the bias and one for the MSE:
+```{r warning=FALSE, error=TRUE}
+
+bias = function(yhat, y){
+  mean(yhat - y)
+}
+
+
+MSE = function(yhat, y){
+  mean((yhat - y)^2)
+}
+```
+
+
+
+
+
+
+
