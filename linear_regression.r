@@ -11,7 +11,7 @@ library(car)
 library(olsrr)
 
 # Only run the code below once! We use it to transform the dummy variable 'weekend' from string to a one-zero case. 
-# Task: Try to think for yourself why you should not run the code a second way this time and think about a solution.   
+# Task: Try to think for yourself why you should not run the code a second time and think about a solution that solves the problem. 
 dataset$weekend <- ifelse(dataset$weekend == "yes", 1, 0)
 # Calculate correlations
 dataset.correlations = cor(dataset[2:8]); 
@@ -27,7 +27,6 @@ summary(mod)
 # Multicollinearity (check 1)
 car::vif(mod)
 # Task: Try to come up with an interpretation for the VIF-Values
-
 
 # Heteroskedasticty via Breusch-Pagan Test (check 2)
 # H0: homoskedasticity vs H1: heteroskedasticity 

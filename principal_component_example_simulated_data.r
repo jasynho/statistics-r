@@ -2,7 +2,7 @@
 set.seed(42)
 # create empty matrix with 100 rows and 10 columns
 data = matrix(nrow = 100, ncol = 10)
-# change names of columns and rows (not really necessary here but now you now how to deal with that for your later studies)
+# change names of columns and rows (not really necessary here but important to know how to deal with that for your later studies)
 # Hint: there could be more rules that's why we use 'c()' but we do not need it here
 colnames(data) = c(paste('var', 1:10, sep='')) 
 rownames(data) = paste('obs', 1:100, sep='')
@@ -31,7 +31,7 @@ pca_var_rel = round(pca_var/sum(pca_var)*100, 1)
 # Create the Barplot
 barplot(pca_var_rel, main = "Barplot of Variation", xlab = "PC", ylab ="Variation in percent")
 
-# Interpretation: PC1 Accounts for almost all of the variation if we use Poisson, but if we use standard normal the varioten is more equally distributed
+# Interpretation: PC1 Accounts for almost all of the variation if we use Poisson, but if we use standard normal the variation is more equally distributed
 
 # Lets see the loading scores: 
 loading_scores = pca$rotation[,1]
